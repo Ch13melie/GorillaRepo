@@ -1,0 +1,60 @@
+import requests
+import time
+
+# Shh! Secret key goes here
+API_KEY = 'f44dae6017df77fc8194b3c4d5765f1b5525f1a2965b959c59e4f3af83a6175a'
+VT_SCAN_URL = "https://www.virustotal.com/api/v3/urls"
+VT_REPORT_URL = "https://www.virustotal.com/api/v3/analyses/{}"
+
+def rilla_link_scanner():
+    print("🦍 Rilla: You have bad link? Rilla smash bad link! (yes/no)")
+    answer = input("You: ").strip().lower()
+
+    if answer != 'yes':
+        print("🦍 Rilla: Hmph. No smash today. Rilla nap.")
+        return
+
+    print("🦍 Rilla: Gimme link. Rilla crush it like coconut!")
+    url = input("You: ").strip()
+
+    print("🦍 Rilla: Sending link to cloud spirits... wait!")
+
+    headers = {
+        "x-apikey": API_KEY
+    }
+
+    response = requests.post(VT_SCAN_URL, headers=headers, data={"url": url})
+
+    if response.status_code != 200:
+        print("🦍 Rilla: Rilla confused. Link no work.")
+        print("Error from spirit cloud:", response.text)
+        return
+
+    analysis_id = response.json()["data"]["id"]
+
+    print("🦍 Rilla: Cloud spirits looking at link. Rilla wait 10 moonbeats...")
+
+    time.sleep(10)
+
+    report_response = requests.get(VT_REPORT_URL.format(analysis_id), headers=headers)
+
+    if report_response.status_code != 200:
+        print("🦍 Rilla: Spirit cloud no give answer. Rilla sad.")
+        return
+
+    result_data = report_response.json()
+    stats = result_data["data"]["attributes"]["stats"]
+    url_id = analysis_id.split("-")[0]
+    full_report_url = f"https://www.virustotal.com/gui/url/{url_id}/detection"
+
+    print("\n🦍 Rilla: Rilla finish smash. Here what Rilla find:")
+    print(f"👍 Clean: {stats['harmless']}")
+    print(f"😐 Suspicious: {stats['suspicious']}")
+    print(f"🚫 Malicious: {stats['malicious']}")
+    print(f"❓ Undetected: {stats['undetected']}")
+    print(f"\n🔗 Rilla say: FULL REPORT HERE --> {full_report_url}")
+    print("🦍 Rilla: You click, you see truth. Rilla protect jungle!")
+
+if __name__ == "__main__":
+    print("🔥🐵 Welcome to Rilla Link Scanner™ – Jungle no like bad links!")
+    rilla_link_scanner()
